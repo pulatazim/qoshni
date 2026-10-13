@@ -25,6 +25,8 @@ jobs:
 
     env:
       DATABASE_URL: postgresql+asyncpg://qoshni:qoshni@localhost:5432/qoshni
+      TEST_DATABASE_URL: postgresql+asyncpg://qoshni:qoshni@localhost:5432/qoshni_test
+      PGPASSWORD: qoshni
 
     steps:
       - uses: actions/checkout@v4
@@ -46,6 +48,9 @@ jobs:
       - name: Migratsiyalar
         working-directory: backend
         run: uv run alembic upgrade head
+
+      - name: Test bazasini yaratish
+        run: createdb -h localhost -U qoshni qoshni_test || echo "allaqachon bor"
 
       - name: Testlar
         working-directory: backend

@@ -14,8 +14,11 @@ ishonch darajasi va moderatsiyani bitta joyga yig'adi.
 
 1-hafta (poydevor) — **tayyor**: FastAPI skeleti (`/health`), PostGIS + pg_trgm bilan
 birinchi migratsiya, `docker compose` (postgres + redis + api), GitHub Actions CI.
-Lokal `docker compose up -d` bilan ko'tarilib, migratsiya va `/health` ishlagani tekshirildi,
-CI yashil. Keyingi bosqich — 2-hafta: Telegram initData tekshiruvi va JWT autentifikatsiyasi.
+Lokal `docker compose up -d` bilan ko'tarilib, migratsiya va `/health` ishlagani tekshirildi.
+
+2-hafta (autentifikatsiya) — ketmoqda: `verify_init_data` (HMAC-SHA256), `POST /auth/telegram`
+→ JWT, `get_current_user`, `users` jadvali, `GET/PATCH /me`, `PUT /me/location` (~300 m
+xiralashtirish), yagona xato formati `{"error": {"code", "message"}}`.
 Loyiha rejasi va texnik dizayn: [docs/Qoshni-MVP-texnik-dizayn.pdf](docs/Qoshni-MVP-texnik-dizayn.pdf).
 
 ## Tez ishga tushirish
@@ -37,6 +40,14 @@ cd backend
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e .[dev]
 ruff check . && pytest
+```
+
+API testlari (`/auth/telegram`, `/me`) PostGIS bazasini talab qiladi — `TEST_DATABASE_URL`
+berilsa ular ishlaydi, berilmasa o'tkazib yuboriladi:
+
+```bash
+docker compose -f deploy/docker-compose.yml exec postgres createdb -U qoshni qoshni_test
+TEST_DATABASE_URL=postgresql+asyncpg://qoshni:qoshni@localhost:5432/qoshni_test pytest
 ```
 
 ## Struktura
