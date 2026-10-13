@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 
 from fastapi import status
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import HTTP_UNPROCESSABLE, NOT_FOUND, VALIDATION_ERROR, ApiError
@@ -34,6 +35,32 @@ def blur_point(
 def to_ewkt(latitude: float, longitude: float) -> str:
     """PostGIS'ning EWKT ko'rinishi — geography ustuniga shu satr yoziladi."""
     return f"SRID=4326;POINT({longitude:.6f} {latitude:.6f})"
+
+
+def parse_ewkt(value: str | None) -> tuple[float, float] | None:
+    """'SRID=4326;POINT(lon lat)' satrini (latitude, longitude) ga aylantiradi."""
+    if not value or "POINT" not in value:
+        return None
+    inner = value[value.index("(") + 1 : value.index(")")]
+    parts = inner.split()
+    if len(parts) != 2:
+        return None
+    try:
+        return float(parts[1]), float(parts[0])
+    except ValueError:
+        return None
+
+
+async def home_coordinates(session: AsyncSession, user: User) -> tuple[float, float] | None:
+    """Profa saqlangan nuqtani (latitude, longitude) ko'rinishida qaytaradi.
+
+    geography ustuni bazadan WKBElement bo'lib keladi (satr emas), shuning uchun
+    koordinatalarni PostGIS'ning o'zida ochamiz — qo'shimcha kutubxona kerak emas.
+    """
+    if user.home_point is None:
+        return None
+    ewkt = await session.scalar(select(func.ST_AsEWKT(User.home_point)).where(User.id == user.id))
+    return parse_ewkt(ewkt)
 
 
 async def update_location(

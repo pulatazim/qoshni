@@ -44,6 +44,22 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 
+# FastAPI endpoint imzalarida Query()/Depends() standart usul — xato emas.
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+    "fastapi.Query",
+    "fastapi.Body",
+    "fastapi.Path",
+    "fastapi.Depends",
+    "fastapi.Security",
+]
+
+# Qidiruv normalizatsiyasi kirill harflari va apostrof variantlarini saqlaydi —
+# bu yerda "noaniq belgi"lar maqsadli yozilgan.
+[tool.ruff.lint.per-file-ignores]
+"app/modules/listings/search.py" = ["RUF001", "RUF003"]
+"tests/test_search_normalize.py" = ["RUF001"]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
