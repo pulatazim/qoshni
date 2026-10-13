@@ -5,7 +5,7 @@ import httpx
 import pytest
 from pydantic import SecretStr
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 import app.models
 from app.core.config import settings
@@ -62,4 +62,24 @@ async def db_client(app_bot_token: str) -> AsyncIterator[httpx.AsyncClient]:
             yield session
     finally:
         app.dependency_overrides.clear()
+        await engine.dispose()
+
+
+@pytest.fixture
+async def db_session(app_bot_token: str) -> AsyncIterator[AsyncSession]:
+    """Seed va servis funksiyalarini to'g'ridan-to'g'ri bazada sinash uchun seansi."""
+    if not TEST_DATABASE_URL:
+        pytest.skip("TEST_DATABASE_URL sozlanmagan — PostGIS bazasi kerak")
+
+    engine = create_async_engine(TEST_DATABASE_URL)
+    async with engine.begin() as connection:
+        await connection.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
+        await connection.run_sync(Base.metadata.drop_all)
+        await connection.run_sync(Base.metadata.create_all)
+
+    session_factory = async_sessionmaker(engine, expire_on_commit=False)
+    try:
+        async with session_factory() as session:
+            yield session
+    finally:
         await engine.dispose()
