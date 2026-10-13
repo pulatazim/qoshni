@@ -12,7 +12,10 @@ ishonch darajasi va moderatsiyani bitta joyga yig'adi.
 
 ## Hozirgi holat
 
-1-hafta (poydevor): FastAPI skeleti, PostGIS + Alembic, `docker compose`, CI.
+1-hafta (poydevor) — **tayyor**: FastAPI skeleti (`/health`), PostGIS + pg_trgm bilan
+birinchi migratsiya, `docker compose` (postgres + redis + api), GitHub Actions CI.
+Lokal `docker compose up -d` bilan ko'tarilib, migratsiya va `/health` ishlagani tekshirildi,
+CI yashil. Keyingi bosqich — 2-hafta: Telegram initData tekshiruvi va JWT autentifikatsiyasi.
 Loyiha rejasi va texnik dizayn: [docs/Qoshni-MVP-texnik-dizayn.pdf](docs/Qoshni-MVP-texnik-dizayn.pdf).
 
 ## Tez ishga tushirish
