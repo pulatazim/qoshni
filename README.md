@@ -16,9 +16,21 @@ ishonch darajasi va moderatsiyani bitta joyga yig'adi.
 birinchi migratsiya, `docker compose` (postgres + redis + api), GitHub Actions CI.
 Lokal `docker compose up -d` bilan ko'tarilib, migratsiya va `/health` ishlagani tekshirildi.
 
-2-hafta (autentifikatsiya) — ketmoqda: `verify_init_data` (HMAC-SHA256), `POST /auth/telegram`
+2-hafta (autentifikatsiya) — **tayyor**: `verify_init_data` (HMAC-SHA256), `POST /auth/telegram`
 → JWT, `get_current_user`, `users` jadvali, `GET/PATCH /me`, `PUT /me/location` (~300 m
 xiralashtirish), yagona xato formati `{"error": {"code", "message"}}`.
+
+2.5 (seed) — **tayyor**: Toshkentning 12 tumani va 14 kategoriya `python -m seeds.seed`
+orqali idempotent ravishda yukiladi.
+
+3–6-hafta (e'lon bozori) — birinchi qismi **tayyor**: `listings` va `listing_images`
+jadvallari (GiST — masofa, GIN trigram — qidiruv, qisman indeks — lenta saralashi),
+`POST /listings`, `GET /listings` (radius + filtrlar + `q` qidiruvi + cursor sahifalash),
+`GET /listings/mine`, `GET /listings/{id}` (ko'rishlar hisobi bilan),
+`POST /listings/{id}/status`, `DELETE /listings/{id}`. Qidiruv kirill/lotin normalizatsiyasi
+bilan ishlaydi: "китоб" so'rovi "kitob" e'lonini topadi.
+Qolgan qismi: R2'ga rasm yuklash, rate limit va moderatsiya filtri.
+
 Loyiha rejasi va texnik dizayn: [docs/Qoshni-MVP-texnik-dizayn.pdf](docs/Qoshni-MVP-texnik-dizayn.pdf).
 
 ## Tez ishga tushirish
@@ -42,8 +54,8 @@ pip install -e .[dev]
 ruff check . && pytest
 ```
 
-API testlari (`/auth/telegram`, `/me`) PostGIS bazasini talab qiladi — `TEST_DATABASE_URL`
-berilsa ular ishlaydi, berilmasa o'tkazib yuboriladi:
+API testlari (`/auth/telegram`, `/me`, `/listings`) PostGIS bazasini talab qiladi —
+`TEST_DATABASE_URL` berilsa ular ishlaydi, berilmasa o'tkazib yuboriladi:
 
 ```bash
 docker compose -f deploy/docker-compose.yml exec postgres createdb -U qoshni qoshni_test
