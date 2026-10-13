@@ -1,0 +1,23 @@
+# Production uchun qatlam: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+services:
+  api:
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    env_file: ../.env
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ../webapp/dist:/srv:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+
+volumes:
+  caddy_data:
+  caddy_config:

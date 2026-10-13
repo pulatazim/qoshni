@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Mahalliy muhit va ma'lumotlar
+.env
+.env.*
+!.env.example
+deploy/data/
+*.log
+backups/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store

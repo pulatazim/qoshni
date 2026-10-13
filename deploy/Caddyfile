@@ -1,0 +1,18 @@
+{$SITE_DOMAIN} {
+	encode zstd gzip
+
+	handle {
+		root * /srv
+		try_files {path} {path}/ /index.html
+		file_server
+	}
+
+	handle_path /api/* /docs /openapi.json /ws {
+		reverse_proxy api:8000
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}
