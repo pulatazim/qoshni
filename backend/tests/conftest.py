@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import (
 import app.models
 from app.core.config import settings
 from app.core.db import Base, get_session
+from app.core.storage import InMemoryStorage, get_storage
 from app.main import app
 
 # Testlarda ishlatiladigan soxta bot tokeni: initData imzosi shu bilan yasalanadi.
@@ -65,7 +66,15 @@ async def db_engine() -> AsyncIterator[AsyncEngine]:
 
 
 @pytest.fixture
-async def db_client(app_bot_token: str, db_engine: AsyncEngine) -> AsyncIterator[httpx.AsyncClient]:
+def storage() -> InMemoryStorage:
+    """R2'ga chiqmaslik uchun: testlarda rasmlar xotirada saqlanadi."""
+    return InMemoryStorage()
+
+
+@pytest.fixture
+async def db_client(
+    app_bot_token: str, db_engine: AsyncEngine, storage: InMemoryStorage
+) -> AsyncIterator[httpx.AsyncClient]:
     """Ilovani yuqoridagi bazaga ulaydi; CI'da bu PostGIS service'i."""
     session_factory = async_sessionmaker(db_engine, expire_on_commit=False)
 
@@ -74,6 +83,7 @@ async def db_client(app_bot_token: str, db_engine: AsyncEngine) -> AsyncIterator
             yield session
 
     app.dependency_overrides[get_session] = override_session
+    app.dependency_overrides[get_storage] = lambda: storage
     try:
         async with httpx.AsyncClient(
             transport=httpx.ASGITransport(app=app), base_url="http://test"

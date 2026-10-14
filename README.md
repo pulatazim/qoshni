@@ -29,7 +29,14 @@ jadvallari (GiST — masofa, GIN trigram — qidiruv, qisman indeks — lenta sa
 `GET /listings/mine`, `GET /listings/{id}` (ko'rishlar hisobi bilan),
 `POST /listings/{id}/status`, `DELETE /listings/{id}`. Qidiruv kirill/lotin normalizatsiyasi
 bilan ishlaydi: "китоб" so'rovi "kitob" e'lonini topadi.
-Qolgan qismi: R2'ga rasm yuklash, rate limit va moderatsiya filtri.
+
+Rasm quvuri ham **tayyor**: `POST /listings/{id}/images` (multipart) → EXIF/GPS tozalanadi,
+burilish piksellarga singdiriladi, WebP'ning ikki ko'rinishi (1080 ochilish + 400 lenta)
+Cloudflare R2'ga yoziladi; `DELETE /listings/{id}/images/{image_id}` ikkala obyektni
+o'chiradi. Bitta e'londa 6 tagacha rasm. R2 kalitlari bo'lmasa ish xotira saqlagichida
+davom etadi (`app/core/storage.py`), shuning uchun testlar tarmoqqa chiqmaydi.
+
+Qolgan qismi: rate limit (Redis) va moderatsiya filtri.
 
 Loyiha rejasi va texnik dizayn: [docs/Qoshni-MVP-texnik-dizayn.pdf](docs/Qoshni-MVP-texnik-dizayn.pdf).
 

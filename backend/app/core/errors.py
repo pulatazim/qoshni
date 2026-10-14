@@ -18,9 +18,6 @@ FORBIDDEN = "forbidden"
 VALIDATION_ERROR = "validation_error"
 INTERNAL_ERROR = "internal_error"
 
-# FastAPI sxema xatolari uchun status (starlette konstantalariga bog'lanmaymiz).
-UNPROCESSABLE = 422
-
 # Sxema xatosi statusi — sonni belgilab olamiz, kutubxona konstantasi nomini almashtirdi.
 HTTP_UNPROCESSABLE = 422
 

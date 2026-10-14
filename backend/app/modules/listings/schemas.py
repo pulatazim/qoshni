@@ -6,6 +6,9 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.core.storage import public_url, thumb_url
+from app.models import ListingImage
+
 PriceType = Literal["fixed", "negotiable", "free"]
 Condition = Literal["new", "used"]
 FeedSort = Literal["new", "cheap", "expensive"]
@@ -27,10 +30,27 @@ class ListingCreate(BaseModel):
 class ListingImageRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    id: int
     storage_key: str
     width: int | None
     height: int | None
     position: int
+    # Manzillar R2 public base'dan hisoblanadi (DB'da saqlanmaydi).
+    url: str = ""
+    thumb_url: str = ""
+
+
+def image_read(image: ListingImage) -> ListingImageRead:
+    """Model → sxem, rasm manzillari bilan."""
+    return ListingImageRead(
+        id=image.id,
+        storage_key=image.storage_key,
+        width=image.width,
+        height=image.height,
+        position=image.position,
+        url=public_url(image.storage_key),
+        thumb_url=thumb_url(image.storage_key),
+    )
 
 
 class ListingRead(BaseModel):

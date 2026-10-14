@@ -10,9 +10,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_session
 from app.core.errors import AUTH_INVALID, ApiError
 from app.core.security import AuthError, decode_access_token
+from app.core.storage import ObjectStorage, get_storage
 from app.models import User
 
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
+StorageDep = Annotated[ObjectStorage, Depends(get_storage)]
 
 
 async def get_current_user(

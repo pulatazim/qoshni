@@ -111,6 +111,14 @@ async def get_listing(session: AsyncSession, listing_id: int) -> Listing:
     return listing
 
 
+async def get_owned_listing(session: AsyncSession, user: User, listing_id: int) -> Listing:
+    """E'lon mavjudligi va unga egalik tekshiruvi (begona e'lon — 403)."""
+    listing = await get_listing(session, listing_id)
+    if listing.seller_id != user.id:
+        raise ApiError(FORBIDDEN, "Bu e'lon sizniki emas", status.HTTP_403_FORBIDDEN)
+    return listing
+
+
 async def feed(
     session: AsyncSession,
     *,

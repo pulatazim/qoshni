@@ -17,6 +17,7 @@ router = APIRouter(prefix="/listings", tags=["listings"])
 def _to_read(listing: Listing) -> schemas.ListingRead:
     read = schemas.ListingRead.model_validate(listing)
     read.distance_m = getattr(listing, "distance_m", None)
+    read.images = [schemas.image_read(image) for image in listing.images]
     return read
 
 

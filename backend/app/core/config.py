@@ -26,6 +26,14 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_ttl_days: int = 7
 
+    # --- Cloudflare R2: e'lon rasmlari shu yerda turadi (S3 mos API) ---
+    r2_account_id: str | None = None
+    r2_bucket: str = "qoshni"
+    r2_access_key_id: str | None = None
+    r2_secret_access_key: SecretStr | None = None
+    # Ommaviy o'qish manzili: r2.dev yoki cdn domeni. Bo'sh bo'lsa URL qaytarilmaydi.
+    r2_public_base_url: str = ""
+
     def bot_token(self) -> str | None:
         """Bot tokenini ochiq ko'rinishda qaytaradi; sozlanmagan bo'lsa None."""
         if self.telegram_bot_token is None:
@@ -35,6 +43,20 @@ class Settings(BaseSettings):
     @property
     def jwt_signing_key(self) -> str:
         return self.jwt_secret.get_secret_value()
+
+    @property
+    def storage_configured(self) -> bool:
+        """R2 kalitlari to'liq bo'lsa haqiqiy saqlagich ishlatiladi."""
+        return bool(self.r2_account_id and self.r2_access_key_id and self.r2_secret_access_key)
+
+    @property
+    def r2_endpoint_url(self) -> str:
+        return f"https://{self.r2_account_id}.r2.cloudflarestorage.com"
+
+    @property
+    def r2_secret_key(self) -> str:
+        assert self.r2_secret_access_key is not None
+        return self.r2_secret_access_key.get_secret_value()
 
 
 @lru_cache
