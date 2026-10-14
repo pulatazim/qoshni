@@ -36,12 +36,28 @@ Rasmlar: backend Cloudflare R2 ga yozadi, foydalanuvchi Cloudflare CDN orqali ol
 - Narx `BIGINT` so'mda; `float` hech qachon ishlatilmaydi.
 - E'lon va foydalanuvchi `deleted_at` orqali soft delete qilinadi.
 
-## Hozirgi qamrov (6-hafta)
+## Hozirgi qamrov (7-hafta)
 
 Ishlaydi: `/health`, PostGIS/pg_trgm migratsiyalari, seed (12 tuman, 14 kategoriya),
 auth (initData → JWT), profil va xiralashtirilgan joylashuv, e'lon bozori (geo-lenta,
 filtrlar, qidiruv, cursor sahifalash, holat, soft delete), rasm quvuri (EXIF tozalash,
 WebP 1080/400, Cloudflare R2), so'rov/e'lon cheklovi va moderatsiya filtri.
 Compose orqali Postgres/Redis, CI (ruff + alembic + pytest).
-Keyingi haftalarda qo'shiladi: Mini App (React/Vite), chat/websocket, ishonch
-reytingi va qo'shimcha moderatsiya, Sentry va zaxira.
+
+Frontend (`webapp/`): React 18 + Vite + TypeScript + TanStack Query, router kutubxonasiz —
+ekran stek'i `App.tsx` da ushlanadi va Telegram `BackButton` shu stek'dan chiqaradi.
+- `src/api/types.ts` — backend sxemalari bilan kelishilgan turlar; `Backend` interfeysi
+  orqali HTTP (`http.ts`) va demo (`mock.ts`) almashinadi.
+- `src/api/http.ts` — `/api/v1` so'rovlari, JWT sessionStorage'da, xato konverti
+  `ApiError`ga aylantiriladi; `src/api/hooks.ts` — query/mutation hooklari.
+- `src/lib/` — `telegram.ts` (SDK qobiq), `i18n.ts` (uz/ru), `format.ts`, `labels.ts`, `geo.ts`.
+- `src/screens/` — Feed, ListingView, Create, Mine, Profile; `src/components/` — karta,
+  chip, pastki panel, holat bloki. Uslub `src/styles.css` (Karrot: #ff5c39, kartochkali
+  setka, masofa belgisi, xavfsiz hududlar).
+
+Brauzerda `?live=1` bo'lmasa demo rejim yoqiladi (`shouldUseMock()`), shuning uchun
+UI Telegram'siz ham ko'riladi. Vite `/api` ni `QOSHNI_API_TARGET`ga proksilaydi — CORS
+sozlamasi talab qilinmaydi.
+
+Keyingi haftalarda qo'shiladi: Telegram boti (kirish tugmasi, bildirishnomalar),
+chat/websocket, ishonch reytingi va qo'shimcha moderatsiya, Sentry va zaxira.

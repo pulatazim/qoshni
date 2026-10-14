@@ -65,3 +65,23 @@ jobs:
       - name: Testlar
         working-directory: backend
         run: uv run pytest
+
+  frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: webapp/package-lock.json
+
+      - name: Bog'liqliklarni o'rnatish
+        working-directory: webapp
+        run: npm ci
+
+      - name: Tip va qurish
+        working-directory: webapp
+        run: npm run build

@@ -10,6 +10,7 @@ from app.core.config import settings
 from app.core.db import engine
 from app.core.errors import install_error_handlers
 from app.modules.auth.router import router as auth_router
+from app.modules.catalog.router import router as catalog_router
 from app.modules.listings.router import router as listings_router
 from app.modules.media.router import router as media_router
 from app.modules.users.router import router as users_router
@@ -44,6 +45,7 @@ app.include_router(auth_router, prefix=API_PREFIX)
 app.include_router(users_router, prefix=API_PREFIX)
 app.include_router(listings_router, prefix=API_PREFIX)
 app.include_router(media_router, prefix=API_PREFIX)
+app.include_router(catalog_router, prefix=API_PREFIX)
 
 
 @app.get("/health")

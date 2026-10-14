@@ -42,7 +42,20 @@ kuniga 20 e'lonni sanaydi (Redis bo'lmasa xotira hisoblagichi ishlaydi),
 ekstremizm) va firibgarlik belgilarini e'lon saqlanmasidan oldin rad etadi.
 Taqiqlangan so'zlar ro'yxati boshlang'ich — `modules/moderation/words.py` da turadi.
 
-Qolgan qismi: 7-haftadan boshlab React/Vite Mini App.
+7-hafta (Mini App) — **tayyor**: `webapp/` papkasida React 18 + Vite + TypeScript +
+TanStack Query asosidagi Telegram Mini App ishlaydi. Karrot (당근마켓) uslubidagi
+interfeys: ikki ustunli lenta masofa belgisi bilan, radius/kategoriya/qidiruv
+filtrlari, e'lon tafsiloti, "Sotish" formasi (bir rasm bilan), "Mening e'lonlarim"
+holatni almashtirish bilan va profil. Barcha yozuvlar `/api/v1` orqali, JWT
+sessionStorage'da. Backend'da lenta uchun kerak bo'lgan `GET /categories` va
+`GET /districts` (koordinatalari bilan) qo'shildi.
+
+Telegram tashqarisida (oddiy brauzerda) ilova **demo rejimida** ochiladi — soxta
+ma'lumot bilan, `webapp/src/api/mock.ts` dan. `?live=1` bilan haqiqiy backend'ga
+ulanish mumkin; kirish `initData` imzosini talab qilgani uchun brauzerda 401 qaytadi,
+bu esa API bilan shartnomani tekshirishga yetadi.
+
+Qolgan qismi: 8-hafta — Telegram boti (kirish tugmasi va bildirishnomalar) va chat.
 
 Loyiha rejasi va texnik dizayn: [docs/Qoshni-MVP-texnik-dizayn.pdf](docs/Qoshni-MVP-texnik-dizayn.pdf).
 
@@ -75,11 +88,21 @@ docker compose -f deploy/docker-compose.yml exec postgres createdb -U qoshni qos
 TEST_DATABASE_URL=postgresql+asyncpg://qoshni:qoshni@localhost:5432/qoshni_test pytest
 ```
 
+Mini App (Node host'da bo'lmasa ham Docker'da ishlaydi):
+
+```bash
+docker compose -f deploy/docker-compose.yml up -d webapp
+# http://localhost:5173 — demo rejim; ?live=1 — haqiqiy API orqali
+```
+
+Node o'rnatilgan bo'lsa: `cd webapp && npm install && npm run dev`.
+`npm run build` tip tekshiruvi (`tsc --noEmit`) bilan birga quradi.
+
 ## Struktura
 
 ```
 backend/    FastAPI ilovasi, SQLAlchemy modellari, Alembic, pytest
-webapp/     React + Vite Mini App (7-haftada qo'shiladi)
+webapp/     React + Vite Mini App (7-haftadan beri ishlaydi)
 deploy/     docker-compose, Caddy, zaxira skripti
 docs/       arxitektura va ADR yozuvlari
 ```
@@ -93,7 +116,8 @@ uv run pytest
 ```
 
 CI har bir push'da `ruff`, `alembic upgrade head` (PostGIS'li Postgres service'da) va
-`pytest` ni ishga tushiradi.
+`pytest` ni ishga tushiradi. Alohida `frontend` job'da `npm ci` va `npm run build`
+(tip tekshiruvi bilan) bajariladi.
 
 ## Stack
 
