@@ -2,14 +2,20 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, UploadFile, status
+from fastapi import APIRouter, Depends, UploadFile, status
 
 from app.core.deps import CurrentUser, SessionDep, StorageDep
+from app.core.rate_limit import minute_quota
 from app.modules.listings.schemas import ListingImageRead, image_read
 from app.modules.listings.service import get_owned_listing
 from app.modules.media import service
 
-router = APIRouter(prefix="/listings/{listing_id}/images", tags=["media"])
+# Rasm yuklash ham qimmat amal — daqiqalik limitga kiradi.
+router = APIRouter(
+    prefix="/listings/{listing_id}/images",
+    tags=["media"],
+    dependencies=[Depends(minute_quota)],
+)
 
 
 @router.post("", response_model=ListingImageRead, status_code=status.HTTP_201_CREATED)

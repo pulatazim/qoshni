@@ -20,6 +20,7 @@ from app.core.errors import (
 )
 from app.models import Category, Listing, User
 from app.modules.listings.search import build_search_text, normalize
+from app.modules.moderation.service import check_listing_text
 from app.modules.users.service import blur_point, home_coordinates, to_ewkt
 
 # Ochilish: 3 km radiusdan boshlanadi, lekin 20 km gacha ruxsat beramiz.
@@ -68,6 +69,9 @@ async def create_listing(
     latitude: float | None,
     longitude: float | None,
 ) -> Listing:
+    # Kuchli taqiq: bunday e'lon bazaga ham tushmaydi.
+    check_listing_text(title, description)
+
     category = await session.get(Category, category_id)
     if category is None or not category.is_active:
         raise ApiError(NOT_FOUND, "Kategoriya topilmadi", status.HTTP_404_NOT_FOUND)

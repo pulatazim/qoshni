@@ -34,6 +34,12 @@ class Settings(BaseSettings):
     # Ommaviy o'qish manzili: r2.dev yoki cdn domeni. Bo'sh bo'lsa URL qaytarilmaydi.
     r2_public_base_url: str = ""
 
+    # --- Cheklovlar (spam va suiiste'moldan himoya) ---
+    # "redis" — production/lockal compose; "memory" — Redis'siz ish yoki test.
+    rate_limit_backend: str = "redis"
+    api_requests_per_minute: int = 60
+    listings_per_day: int = 20
+
     def bot_token(self) -> str | None:
         """Bot tokenini ochiq ko'rinishda qaytaradi; sozlanmagan bo'lsa None."""
         if self.telegram_bot_token is None:

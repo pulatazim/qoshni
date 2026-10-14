@@ -59,6 +59,7 @@ extend-immutable-calls = [
 [tool.ruff.lint.per-file-ignores]
 "app/modules/listings/search.py" = ["RUF001", "RUF003"]
 "tests/test_search_normalize.py" = ["RUF001"]
+"tests/test_moderation.py" = ["RUF001", "RUF002"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

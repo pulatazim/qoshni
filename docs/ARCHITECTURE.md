@@ -36,9 +36,12 @@ Rasmlar: backend Cloudflare R2 ga yozadi, foydalanuvchi Cloudflare CDN orqali ol
 - Narx `BIGINT` so'mda; `float` hech qachon ishlatilmaydi.
 - E'lon va foydalanuvchi `deleted_at` orqali soft delete qilinadi.
 
-## Hozirgi qamrov (1-hafta)
+## Hozirgi qamrov (6-hafta)
 
-Ishlaydi: `/health`, `districts` jadvali va birinchi migratsiya, compose orqali
-Postgres/Redis, CI (ruff + alembic + pytest).
-Keyingi haftalarda qo'shiladi: auth va foydalanuvchilar, e'lonlar va rasm quvuri, Mini
-App, chat/websocket, ishonch va moderatsiya, Sentry va zaxira.
+Ishlaydi: `/health`, PostGIS/pg_trgm migratsiyalari, seed (12 tuman, 14 kategoriya),
+auth (initData → JWT), profil va xiralashtirilgan joylashuv, e'lon bozori (geo-lenta,
+filtrlar, qidiruv, cursor sahifalash, holat, soft delete), rasm quvuri (EXIF tozalash,
+WebP 1080/400, Cloudflare R2), so'rov/e'lon cheklovi va moderatsiya filtri.
+Compose orqali Postgres/Redis, CI (ruff + alembic + pytest).
+Keyingi haftalarda qo'shiladi: Mini App (React/Vite), chat/websocket, ishonch
+reytingi va qo'shimcha moderatsiya, Sentry va zaxira.

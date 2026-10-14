@@ -275,3 +275,38 @@ async def test_unknown_category_is_rejected(db_client) -> None:
 
     assert response.status_code == 404
     assert response.json()["error"]["code"] == "not_found"
+
+
+async def test_prohibited_topic_never_reaches_the_database(db_client, db_session) -> None:
+    """Taqiqlangan mavzu saqlanmaydi — e'lon bazaga tushmaydi ham."""
+    headers = await login(db_client, 900_014)
+    category_id = await add_category(db_session)
+
+    rejected = await db_client.post(
+        "/api/v1/listings",
+        json={"title": "Miltiq sotaman", "description": "Hujjati bor", "category_id": category_id},
+        headers=headers,
+    )
+    assert rejected.status_code == 422
+    assert rejected.json()["error"]["code"] == "validation_error"
+    assert "qurol" in rejected.json()["error"]["message"]
+
+    mine = await db_client.get("/api/v1/listings/mine", headers=headers)
+    assert mine.json()["items"] == []
+
+
+async def test_fraud_phrase_is_rejected(db_client, db_session) -> None:
+    headers = await login(db_client, 900_015)
+    category_id = await add_category(db_session)
+
+    response = await db_client.post(
+        "/api/v1/listings",
+        json={
+            "title": "Ishonchli arzon telefon",
+            "description": "Karta rekvizit yozib yuboring",
+            "category_id": category_id,
+        },
+        headers=headers,
+    )
+    assert response.status_code == 422
+    assert "firibgarlik" in response.json()["error"]["message"]

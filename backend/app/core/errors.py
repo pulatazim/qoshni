@@ -16,6 +16,7 @@ AUTH_BANNED = "auth_banned"
 NOT_FOUND = "not_found"
 FORBIDDEN = "forbidden"
 VALIDATION_ERROR = "validation_error"
+RATE_LIMITED = "rate_limited"
 INTERNAL_ERROR = "internal_error"
 
 # Sxema xatosi statusi — sonni belgilab olamiz, kutubxona konstantasi nomini almashtirdi.
@@ -30,23 +31,31 @@ class ApiError(Exception):
         code: str,
         message: str,
         status_code: int = status.HTTP_400_BAD_REQUEST,
+        retry_after: int | None = None,
     ) -> None:
         super().__init__(message)
         self.code = code
         self.message = message
         self.status_code = status_code
+        # Rate limit uchun: frontend qachon qayta urinishini shu sarlavhadan oladi.
+        self.retry_after = retry_after
 
 
-def error_response(code: str, message: str, status_code: int) -> JSONResponse:
+def error_response(
+    code: str, message: str, status_code: int, retry_after: int | None = None
+) -> JSONResponse:
+    headers = {"Retry-After": str(retry_after)} if retry_after else None
     return JSONResponse(
-        status_code=status_code, content={"error": {"code": code, "message": message}}
+        status_code=status_code,
+        content={"error": {"code": code, "message": message}},
+        headers=headers,
     )
 
 
 def install_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(ApiError)
     async def handle_api_error(_: Request, exc: ApiError) -> JSONResponse:
-        return error_response(exc.code, exc.message, exc.status_code)
+        return error_response(exc.code, exc.message, exc.status_code, exc.retry_after)
 
     @app.exception_handler(StarletteHTTPException)
     async def handle_http_error(_: Request, exc: StarletteHTTPException) -> JSONResponse:

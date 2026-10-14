@@ -2,16 +2,17 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Query, Response, status
+from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.core.deps import CurrentUser, SessionDep
 from app.core.errors import HTTP_UNPROCESSABLE, VALIDATION_ERROR, ApiError
+from app.core.rate_limit import listing_quota, minute_quota
 from app.models import Listing
 from app.modules.listings import schemas, service
 from app.modules.listings.service import DEFAULT_RADIUS_M
 from app.modules.users.service import home_coordinates
 
-router = APIRouter(prefix="/listings", tags=["listings"])
+router = APIRouter(prefix="/listings", tags=["listings"], dependencies=[Depends(minute_quota)])
 
 
 def _to_read(listing: Listing) -> schemas.ListingRead:
@@ -23,7 +24,10 @@ def _to_read(listing: Listing) -> schemas.ListingRead:
 
 @router.post("", response_model=schemas.ListingRead, status_code=status.HTTP_201_CREATED)
 async def create_listing(
-    user: CurrentUser, payload: schemas.ListingCreate, session: SessionDep
+    user: CurrentUser,
+    payload: schemas.ListingCreate,
+    session: SessionDep,
+    _: None = Depends(listing_quota),
 ) -> schemas.ListingRead:
     listing = await service.create_listing(
         session,

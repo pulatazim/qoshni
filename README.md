@@ -23,7 +23,7 @@ xiralashtirish), yagona xato formati `{"error": {"code", "message"}}`.
 2.5 (seed) — **tayyor**: Toshkentning 12 tumani va 14 kategoriya `python -m seeds.seed`
 orqali idempotent ravishda yukiladi.
 
-3–6-hafta (e'lon bozori) — birinchi qismi **tayyor**: `listings` va `listing_images`
+3–6-hafta (e'lon bozori) — **tayyor**: `listings` va `listing_images`
 jadvallari (GiST — masofa, GIN trigram — qidiruv, qisman indeks — lenta saralashi),
 `POST /listings`, `GET /listings` (radius + filtrlar + `q` qidiruvi + cursor sahifalash),
 `GET /listings/mine`, `GET /listings/{id}` (ko'rishlar hisobi bilan),
@@ -36,7 +36,13 @@ Cloudflare R2'ga yoziladi; `DELETE /listings/{id}/images/{image_id}` ikkala obye
 o'chiradi. Bitta e'londa 6 tagacha rasm. R2 kalitlari bo'lmasa ish xotira saqlagichida
 davom etadi (`app/core/storage.py`), shuning uchun testlar tarmoqqa chiqmaydi.
 
-Qolgan qismi: rate limit (Redis) va moderatsiya filtri.
+Cheklov va moderatsiya ham qo'shildi: `core/rate_limit.py` daqiqada 60 ta so'rov va
+kuniga 20 e'lonni sanaydi (Redis bo'lmasa xotira hisoblagichi ishlaydi),
+`modules/moderation/` esa taqiqlangan mavzu (qurol, giyohvand, pornografiya,
+ekstremizm) va firibgarlik belgilarini e'lon saqlanmasidan oldin rad etadi.
+Taqiqlangan so'zlar ro'yxati boshlang'ich — `modules/moderation/words.py` da turadi.
+
+Qolgan qismi: 7-haftadan boshlab React/Vite Mini App.
 
 Loyiha rejasi va texnik dizayn: [docs/Qoshni-MVP-texnik-dizayn.pdf](docs/Qoshni-MVP-texnik-dizayn.pdf).
 

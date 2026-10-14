@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import (
 import app.models
 from app.core.config import settings
 from app.core.db import Base, get_session
+from app.core.rate_limit import InMemoryRateLimiter, get_limiter
 from app.core.storage import InMemoryStorage, get_storage
 from app.main import app
 
@@ -72,8 +73,17 @@ def storage() -> InMemoryStorage:
 
 
 @pytest.fixture
+def limiter() -> InMemoryRateLimiter:
+    """Redis'siz test: cheklov hisobi jarayon xotirasida yuradi."""
+    return InMemoryRateLimiter()
+
+
+@pytest.fixture
 async def db_client(
-    app_bot_token: str, db_engine: AsyncEngine, storage: InMemoryStorage
+    app_bot_token: str,
+    db_engine: AsyncEngine,
+    storage: InMemoryStorage,
+    limiter: InMemoryRateLimiter,
 ) -> AsyncIterator[httpx.AsyncClient]:
     """Ilovani yuqoridagi bazaga ulaydi; CI'da bu PostGIS service'i."""
     session_factory = async_sessionmaker(db_engine, expire_on_commit=False)
@@ -84,6 +94,7 @@ async def db_client(
 
     app.dependency_overrides[get_session] = override_session
     app.dependency_overrides[get_storage] = lambda: storage
+    app.dependency_overrides[get_limiter] = lambda: limiter
     try:
         async with httpx.AsyncClient(
             transport=httpx.ASGITransport(app=app), base_url="http://test"
