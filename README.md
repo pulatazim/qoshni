@@ -115,12 +115,42 @@ docker compose -f deploy/docker-compose.yml exec bot python -m app.bot.setup
 `app.bot.setup` Telegram'ga yozadi: `/start`, `/app` buyruqlari va menyudagi Mini App
 tugmasi. Uning oldidan `.env` da `WEBAPP_URL` to'ldirilgan bo'lishi kerak (HTTPS manzil).
 
+## HTTPS'ga chiqarish (nginx + Let's Encrypt)
+
+Mini App faqat HTTPS domenda ishlaydi, shuning uchun bu bosqich launch uchun shart.
+`deploy/nginx/Dockerfile` statik bundle'ni, nginx konfiguratsiyasini va certbot'ni bitta
+image'ga yig'adi: `/api/*` va `/health` backend'ga proksilanadi, qolgan yo'lar `index.html`
+ga tushadi (SPA), sertifikat 12 soatda bir tekshiriladi va yangilansa nginx reload bo'ladi.
+
+```bash
+# 0) Domenga A yozuvi: VM publip IP. .env da SITE_DOMAIN=qoshni.example.com.
+# 1) Sertifikat bo'lmasa :443 server'i ishga tushmaydi — avval vaqtinchalik sertifikat.
+sh deploy/nginx/tls-placeholder.sh qoshni.example.com
+
+# 2) Production qatlam bilan ko'tarish (vite dev server yoqilmaydi).
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.prod.yml up -d --build
+
+# 3) Haqiqiy sertifikatni olish (HTTP-01; nginx :80 da /.well-known ni beradi).
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.prod.yml \
+  exec web certbot certonly --webroot -w /var/www/certbot \
+  -d qoshni.example.com --email pochta@example.com --agree-tos -n
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.prod.yml \
+  exec web nginx -s reload
+
+# 4) Botga manzilni ko'rsatish: .env da WEBAPP_URL=https://qoshni.example.com/ bo'ladi,
+#    so'ng menyudagi "Qo'shni" tugmasi o'rnatiladi.
+docker compose -f deploy/docker-compose.yml exec bot python -m app.bot.setup
+```
+
+Tekshirish: `curl https://qoshni.example.com/health` → `{"status":"ok",...}` va
+`curl -I http://qoshni.example.com/` → `301`.
+
 ## Struktura
 
 ```
-backend/    FastAPI ilovasi, SQLAlchemy modellari, Alembic, pytest
+backend/    FastAPI ilovasi, SQLAlchemy modellari, Alembic, pytest, aiogram boti
 webapp/     React + Vite Mini App (7-haftadan beri ishlaydi)
-deploy/     docker-compose, Caddy, zaxira skripti
+deploy/     docker-compose (dev + prod), nginx konfiguratsiyasi, zaxira skripti
 docs/       arxitektura va ADR yozuvlari
 ```
 

@@ -1,0 +1,16 @@
+# `docker build -f deploy/nginx/Dockerfile .` uchun context — repo ildosi.
+.git
+.github
+.env
+.env.*
+
+# Yasov papkalari: image'ning o'zi quradi, mount kerak emas.
+**/node_modules
+webapp/dist
+**/__pycache__
+backend/.venv
+.pytest_cache
+.ruff_cache
+backups
+deploy/data
+*.log

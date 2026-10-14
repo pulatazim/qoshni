@@ -6,7 +6,7 @@ Compose orqali. 10 000 faol foydalanuvchigacha ikkinchi servisga o'tish talab qi
 ## Qatlam
 
 ```
-Telegram Mini App (React)  ->  Caddy (HTTPS, statik)  ->  FastAPI (/api/v1, /ws)
+Telegram Mini App (React)  ->  nginx (HTTPS, statik)  ->  FastAPI (/api/v1, /ws)
                                                               |
                      Redis (kesh, pub/sub)  <---------  PostgreSQL 16 + PostGIS + pg_trgm
                                                               |
@@ -14,6 +14,21 @@ Telegram Mini App (React)  ->  Caddy (HTTPS, statik)  ->  FastAPI (/api/v1, /ws)
 ```
 
 Rasmlar: backend Cloudflare R2 ga yozadi, foydalanuvchi Cloudflare CDN orqali oladi.
+
+## Frontend qanday beriladi
+
+- Ishlab chiqishda: `webapp` servisi (vite dev server, `docker-compose.yml`) va `/api`
+  so'rovlarini `QOSHNI_API_TARGET`ga proksilaydi.
+- Production'da: `deploy/nginx/Dockerfile` bitta image yasaydi — statik bundle
+  (`npm run build`) + nginx + certbot. Sayt konfiguratsiyasi
+  `deploy/nginx/templates/default.conf.template`: `SITE_DOMAIN` muhit o'zgaruvchisi bilan
+  almashtiriladi, `:80` faqat `/.well-known` ni berib `:443`ga buradi, `:443` SPA'ni
+  (`try_files ... /index.html`), `/api/` va `/health` ni `api:8000`ga proksilaydi,
+  `client_max_body_size 12m` (rasm yuklash chegarasi). Sertifikat papkasi
+  `/etc/letsencrypt/live/<SITE_DOMAIN>/` — `letsencrypt` va `certbot_www` volume'larida,
+  host fayllarida emas. `30-renew-loop.sh` 12 soatda bir tekshiradi, yangilansa
+  `nginx -s reload` qiladi (shu sababli CMD `nginx` bo'lishi kerak: nginx entrypoint'i
+  `/docker-entrypoint.d` skriptlarini faqat shunda bajaradi).
 
 ## Kod tuzilishi
 

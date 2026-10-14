@@ -1,23 +1,36 @@
-# Production uchun qatlam: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# Production qatlam:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# Bu yerda faqat farqlar yoziladi: kod image'dan olinadi (bind mount yo'q),
+# vite dev server o'chiriladi, nginx + certbot qo'shiladi.
+
 services:
   api:
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    # Image ichidagi kod ishlatiladi — `../backend:/code` mount'i dev'ga tegishli.
+    volumes: !override []
 
-  caddy:
-    image: caddy:2-alpine
+  # Dev-only: production'da statik bundle nginx'dan beriladi.
+  webapp:
+    profiles: ["dev"]
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/nginx/Dockerfile
     restart: unless-stopped
     env_file: ../.env
+    volumes:
+      # certbot bu papkaga tekshiruv faylini yozadi, nginx uni beradi.
+      - certbot_www:/var/www/certbot
+      # Sertifikatlar shu yerda saqlanadi (host'da fayl emas, volume).
+      - letsencrypt:/etc/letsencrypt
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - ../webapp/dist:/srv:ro
-      - caddy_data:/data
-      - caddy_config:/config
     depends_on:
       - api
 
 volumes:
-  caddy_data:
-  caddy_config:
+  certbot_www:
+  letsencrypt:

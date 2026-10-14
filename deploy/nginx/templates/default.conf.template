@@ -1,0 +1,71 @@
+# Qoshni Mini App — nginx sayti.
+# nginx rasmiy image'i /etc/nginx/templates/*.template fayllarini muhit
+# o'zgaruvchilari bilan almashtirib /etc/nginx/conf.d/ ga chiqaradi.
+# SITE_DOMAIN — Let's Encrypt sertifikat papkasining nomi ham (live/<SITE_DOMAIN>/).
+
+server {
+    listen 80;
+    server_name ${SITE_DOMAIN};
+
+    # HTTP-01 tekshiruvi: certbot shu papkaga fayl yozadi, nginx uni beradi.
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name ${SITE_DOMAIN};
+
+    ssl_certificate /etc/letsencrypt/live/${SITE_DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${SITE_DOMAIN}/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:qoshni_ssl:10m;
+    ssl_session_timeout 1h;
+
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+
+    # Rasm yuklash: 10 MB fayl + multipart chegarasi.
+    client_max_body_size 12m;
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+    gzip_min_length 1024;
+
+    root /usr/share/nginx/html;
+
+    # SPA: noma'lum yo'l index.html ga tushadi — ekran steki shu orqali ochiladi.
+    location / {
+        try_files $uri /index.html;
+        expires -1;
+    }
+
+    # Vite fayl nomlarida hash bor, shuning uchun 30 kunlik cache xavfsiz.
+    location /assets/ {
+        try_files $uri =404;
+        expires 30d;
+    }
+
+    location /api/ {
+        proxy_pass http://api:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 30s;
+    }
+
+    # Tashqaridan tekshirish uchun (`curl https://domen/health`).
+    location = /health {
+        proxy_pass http://api:8000/health;
+        access_log off;
+    }
+}
