@@ -68,9 +68,13 @@ ekran stek'i `App.tsx` da ushlanadi va Telegram `BackButton` shu stek'dan chiqar
 - `src/api/http.ts` — `/api/v1` so'rovlari, JWT sessionStorage'da, xato konverti
   `ApiError`ga aylantiriladi; `src/api/hooks.ts` — query/mutation hooklari.
 - `src/lib/` — `telegram.ts` (SDK qobiq), `i18n.ts` (uz/ru), `format.ts`, `labels.ts`, `geo.ts`.
+  `telegram.ts` dastur rangini Telegram temasiga moslaydi va `BackButton`/`MainButton`ni
+  boshqaradi; SDK brauzerda ham mavjud, lekin buyruqlari ishlamaydi, shu sababli har bir
+  chaqiruv `inTelegram()` (bo'sh bo'lmagan `initData`) bilan cheklangan.
 - `src/screens/` — Feed, ListingView, Create, Mine, Profile; `src/components/` — karta,
   chip, pastki panel, holat bloki. Uslub `src/styles.css` (Karrot: #ff5c39, kartochkali
-  setka, masofa belgisi, xavfsiz hududlar).
+  setka, masofa belgisi, xavfsiz hududlar). Create ekranida e'lonni joylash Telegram'da
+  pastdagi `MainButton`ga o'tadi — shunda sahifadagi tugma va pastki panel yashiriladi.
 
 Brauzerda `?live=1` bo'lmasa demo rejim yoqiladi (`shouldUseMock()`), shuning uchun
 UI Telegram'siz ham ko'riladi. Vite `/api` ni `QOSHNI_API_TARGET`ga proksilaydi — CORS
