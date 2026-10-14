@@ -1,13 +1,13 @@
 // Yangi e'lon: forma → POST /listings → bitta rasm yuklash → tafsilot ekraniga o'tish.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAddImage, useCategories, useCreateListing } from "../api/hooks";
 import type { Condition, Coordinates, PriceType } from "../api/types";
 import { Chip, ChipRow } from "../components/Chip";
 import { Notice } from "../components/States";
 import { useLang } from "../lib/i18n";
 import { askPosition } from "../lib/geo";
-import { tap } from "../lib/telegram";
+import { hasMainButton, mainButton, tap } from "../lib/telegram";
 
 export function Create({ onDone, onBack }: { onDone: (id: number) => void; onBack: () => void }) {
   const { t, lang } = useLang();
@@ -71,6 +71,20 @@ export function Create({ onDone, onBack }: { onDone: (id: number) => void; onBac
       setError(t("gpsError"));
     }
   }
+
+  // Telegram'da e'lonni joylash pastdagi MainButton orqali bajariladi.
+  useEffect(
+    () =>
+      mainButton({
+        text: busy ? t("saveDraft") : t("publish"),
+        visible: true,
+        enabled: !busy,
+        progress: busy,
+        onClick: submit,
+      }),
+    // submit har render'da yangi funksiya — unga kiradigan qiymatlar ro'yxatda.
+    [busy, t, title, description, price, priceType, condition, categoryId, file, gps],
+  );
 
   if (!list.length && categories.isPending) return <Notice text={t("loading")} />;
 
@@ -185,9 +199,12 @@ export function Create({ onDone, onBack }: { onDone: (id: number) => void; onBac
 
       {error && <p className="error">{error}</p>}
 
-      <button type="button" className="btn btn-primary" disabled={busy} onClick={submit}>
-        {busy ? t("saveDraft") : t("publish")}
-      </button>
+      {/* Telegram'da bu ish pastdagi MainButton'ga o'tadi — ikki marta ko'rsatmaymiz. */}
+      {!hasMainButton() && (
+        <button type="button" className="btn btn-primary" disabled={busy} onClick={submit}>
+          {busy ? t("saveDraft") : t("publish")}
+        </button>
+      )}
     </div>
   );
 }

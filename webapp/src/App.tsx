@@ -11,7 +11,7 @@ import { ListingView } from "./screens/ListingView";
 import { Mine } from "./screens/Mine";
 import { Profile } from "./screens/Profile";
 import { LangContext, makeT } from "./lib/i18n";
-import { initDataString, onBackButton, shouldUseMock, telegramLanguage } from "./lib/telegram";
+import { hasMainButton, initDataString, onBackButton, shouldUseMock, telegramLanguage } from "./lib/telegram";
 
 export type Route =
   | { name: "feed" }
@@ -77,11 +77,14 @@ export function App() {
           <Mine onOpen={(id) => open({ name: "listing", id })} onSell={() => open({ name: "create" })} />
         )}
         {route.name === "profile" && <Profile profile={profile} onMyListings={() => goTab("mine")} />}
-        <BottomNav
-          active={route.name === "listing" || route.name === "create" ? null : route.name}
-          onTab={goTab}
-          onSell={() => open({ name: "create" })}
-        />
+        {/* Create ekranida Telegram MainButton pastki panelning o'rnini bosadi. */}
+        {!(route.name === "create" && hasMainButton()) && (
+          <BottomNav
+            active={route.name === "listing" || route.name === "create" ? null : route.name}
+            onTab={goTab}
+            onSell={() => open({ name: "create" })}
+          />
+        )}
       </div>
     </LangContext.Provider>
   );
