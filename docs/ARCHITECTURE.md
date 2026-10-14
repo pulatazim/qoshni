@@ -21,6 +21,8 @@ Rasmlar: backend Cloudflare R2 ga yozadi, foydalanuvchi Cloudflare CDN orqali ol
 - `app/modules/<usta>/` — `router.py`, `service.py`, `schemas.py`. Modul faqat o'z
   jadvaliga yozadi; boshqa modulga kerak bo'lsa, uning service'ini chaqiradi.
 - `app/models/` — SQLAlchemy modellari, migratsiyalar `migrations/` da.
+- `app/bot/` — aiogram servisi: Mini App'ga kirish tugmalari va matnlar (uz/ru). Suhbat
+  mantiqi yo'q — bot foydalanuvchini ilovaga yetkazadi, keyin bildirishnoma kanali bo'ladi.
 - `app/admin/` — SQLAdmin moderatsiya paneli.
 - `app/worker.py` — ARQ vazifalari (bildirishnomalar, keyin rasm qayta ishlash).
 
@@ -36,7 +38,7 @@ Rasmlar: backend Cloudflare R2 ga yozadi, foydalanuvchi Cloudflare CDN orqali ol
 - Narx `BIGINT` so'mda; `float` hech qachon ishlatilmaydi.
 - E'lon va foydalanuvchi `deleted_at` orqali soft delete qilinadi.
 
-## Hozirgi qamrov (7-hafta)
+## Hozirgi qamrov (8-hafta)
 
 Ishlaydi: `/health`, PostGIS/pg_trgm migratsiyalari, seed (12 tuman, 14 kategoriya),
 auth (initData → JWT), profil va xiralashtirilgan joylashuv, e'lon bozori (geo-lenta,
@@ -59,5 +61,10 @@ Brauzerda `?live=1` bo'lmasa demo rejim yoqiladi (`shouldUseMock()`), shuning uc
 UI Telegram'siz ham ko'riladi. Vite `/api` ni `QOSHNI_API_TARGET`ga proksilaydi — CORS
 sozlamasi talab qilinmaydi.
 
-Keyingi haftalarda qo'shiladi: Telegram boti (kirish tugmasi, bildirishnomalar),
-chat/websocket, ishonch reytingi va qo'shimcha moderatsiya, Sentry va zaxira.
+Keyingi haftalarda qo'shiladi: chat/websocket, bot orqali bildirishnomalar (yangi xabar,
+e'lon holati), ishonch reytingi va qo'shimcha moderatsiya, Sentry va zaxira.
+
+Bot (`app/bot/`) long polling bilan ishlaydi — webhook uchun HTTPS domen hozircha kerak
+emas. Mini App manzili `WEBAPP_URL` dan olinadi: u bo'sh bo'lsa `/app` matn bilan javob
+qaytaradi va menyu tugmasi o'rnatilmaydi. Sozlash Telegram'ga `python -m app.bot.setup`
+orqali yoziladi (buyruqlar uz/ru, menyu tugmasi).

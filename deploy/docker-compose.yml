@@ -41,6 +41,16 @@ services:
       redis:
         condition: service_healthy
 
+  # Bot: Mini App'ga kirish nuqtasi. Token bo'lmasa servis xato bilan chiqadi.
+  bot:
+    build: ../backend
+    restart: unless-stopped
+    env_file: ../.env
+    command: ["python", "-m", "app.bot"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   webapp:
     image: node:24-alpine
     working_dir: /app

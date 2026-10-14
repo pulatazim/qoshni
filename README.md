@@ -55,7 +55,14 @@ ma'lumot bilan, `webapp/src/api/mock.ts` dan. `?live=1` bilan haqiqiy backend'ga
 ulanish mumkin; kirish `initData` imzosini talab qilgani uchun brauzerda 401 qaytadi,
 bu esa API bilan shartnomani tekshirishga yetadi.
 
-Qolgan qismi: 8-hafta — Telegram boti (kirish tugmasi va bildirishnomalar) va chat.
+8-hafta (bot) — **tayyor**: `backend/app/bot/` da aiogram asosidagi servis boti. U
+suhbat boti emas — Mini App'ning kirish qapi: `/start` salomi (ism bilan, uz/ru),
+`/app` tugmasi va chat menyudagi doimiy "Qo'shni" tugmasi (`set_chat_menu_button`).
+Buyruqlar ro'yxati tilga mos yuboriladi (`set_my_commands`, uz va ru). `WEBAPP_URL`
+bo'sh bo'lsa tugmalar qo'yilmaydi, bot baribir ishlaydi.
+
+Qolgan qismi: 9–12-hafta — chat va bildirishnomalar (bot shunda xabar yuboruvchi kanal
+bo'ladi), 13–14 — ishonch va moderatsiya paneli, 15 — zaxira/monitoring, 16 — yopiq beta.
 
 Loyiha rejasi va texnik dizayn: [docs/Qoshni-MVP-texnik-dizayn.pdf](docs/Qoshni-MVP-texnik-dizayn.pdf).
 
@@ -97,6 +104,16 @@ docker compose -f deploy/docker-compose.yml up -d webapp
 
 Node o'rnatilgan bo'lsa: `cd webapp && npm install && npm run dev`.
 `npm run build` tip tekshiruvi (`tsc --noEmit`) bilan birga quradi.
+
+Telegram boti (long polling — serverga webhook hojati yo'q):
+
+```bash
+docker compose -f deploy/docker-compose.yml up -d bot      # ishga tushirish
+docker compose -f deploy/docker-compose.yml exec bot python -m app.bot.setup
+```
+
+`app.bot.setup` Telegram'ga yozadi: `/start`, `/app` buyruqlari va menyudagi Mini App
+tugmasi. Uning oldidan `.env` da `WEBAPP_URL` to'ldirilgan bo'lishi kerak (HTTPS manzil).
 
 ## Struktura
 

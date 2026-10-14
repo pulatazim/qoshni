@@ -7,7 +7,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    # `.env` repo ildida turadi: `backend/` ichidan ishga tushganda ham topilsin.
+    model_config = SettingsConfigDict(
+        env_file=(".env", "../.env"),
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
     app_name: str = "Qo'shni API"
     environment: str = "dev"
@@ -18,6 +23,8 @@ class Settings(BaseSettings):
 
     # Telegram Mini App: initData HMAC tekshiruvi shu token bilan bo'ladi.
     telegram_bot_token: SecretStr | None = None
+    # Mini App manzili (https). Botdagi tugmalar shu yerga ochadi.
+    webapp_url: str = ""
     # initData necha soniyagacha yaroqli hisoblanadi (dizayn: 24 soat).
     init_data_max_age_seconds: int = 86400
 
